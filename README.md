@@ -1,4 +1,4 @@
-aspen-mqtt
-==========
+AspenMQ
+=======
 
 aspen-mqtt: work in progress
