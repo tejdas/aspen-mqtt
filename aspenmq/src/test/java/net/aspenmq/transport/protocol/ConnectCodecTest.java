@@ -57,6 +57,7 @@ public class ConnectCodecTest extends TestCase {
         assertTrue(frameHeader != null);
         assertEquals(frameHeader.getMessageType(), MessageType.CONNECT);
         assertEquals(frameHeader.getMessageLength(), buf.readableBytes());
+        System.out.println(buf.readableBytes());
 
         Connect connectHeaderOut = Connect.decode(buf);
         assertConnect(connectHeaderIn, connectHeaderOut);

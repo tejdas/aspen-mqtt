@@ -14,7 +14,7 @@ import net.aspenmq.transport.frame.MessageType;
 
 import org.apache.commons.lang.StringUtils;
 
-public class Connect {
+public class Connect implements ProtocolMessage {
     private static final String MQTT_PROTOCOL_NAME = "MQIsdp";
     private static final int MQTT_PROTOCOL_VERSION = 0x03;
 
@@ -29,6 +29,7 @@ public class Connect {
     private String userName = StringUtils.EMPTY;
     private String password = StringUtils.EMPTY;
 
+    @Override
     public ByteBuf encode() throws IOException {
         ByteBuf buf = Unpooled.buffer(256);
         ByteBufOutputStream bos = new ByteBufOutputStream(buf);

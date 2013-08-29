@@ -1,5 +1,8 @@
 package net.aspenmq.transport.frame;
 
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.Unpooled;
+
 import java.util.Arrays;
 
 import junit.framework.TestCase;
@@ -80,7 +83,8 @@ public class FrameHeaderTest extends TestCase {
         } while (messageLength > 0);
 
         try {
-            FrameHeader.parseHeader(header);
+            ByteBuf headerBuf = Unpooled.copiedBuffer(header);
+            FrameHeader.parseHeader(headerBuf);
             fail("Expected RuntimeException");
         } catch (RuntimeException ignore) {
         }
@@ -91,14 +95,15 @@ public class FrameHeaderTest extends TestCase {
             boolean isDuplicate,
             MessageType msgType,
             int msgLen) {
-        byte[] headerBuf = new byte[FrameHeader.FIXED_HEADER_MAX_LENGTH];
+        byte[] header = new byte[FrameHeader.FIXED_HEADER_MAX_LENGTH];
         FrameHeader frameHeaderIn = new FrameHeader(retain,
                 qos,
                 isDuplicate,
                 msgType,
                 msgLen);
-        frameHeaderIn.marshalHeader(headerBuf);
+        frameHeaderIn.marshalHeader(header);
 
+        ByteBuf headerBuf = Unpooled.copiedBuffer(header);
         FrameHeader frameHeaderOut = FrameHeader.parseHeader(headerBuf);
         assertFrameHeader(frameHeaderIn, frameHeaderOut);
     }

@@ -5,6 +5,7 @@ import io.netty.buffer.ByteBuf;
 import java.util.Arrays;
 
 public class FrameHeader {
+    public static final int FIXED_HEADER_MIN_LENGTH = 2;
     public static final int FIXED_HEADER_MAX_LENGTH = 5;
 
     public static enum QoS {
@@ -70,34 +71,13 @@ public class FrameHeader {
         return pos+1;
     }
 
-    public static FrameHeader parseHeader(byte[] header) {
+    public static FrameHeader parseHeader(ByteBuf headerBuf) {
+        if (headerBuf.readableBytes() < FIXED_HEADER_MIN_LENGTH) {
+            return null;
+        }
         int pos = 0;
-        boolean retain = ((header[pos] & 0x01) == 1);
-        int qosVal = (header[pos] >> 1) & 0x03;
-        boolean isDuplicate = (((header[pos] >> 3) & 0x01) == 1);
-        int msgType = (header[pos] >> 4) & 0x0F;
-
-        int messageLength = 0; // TODO
-        int multiplier = 1;
-        do {
-            pos++;
-            if (pos == FIXED_HEADER_MAX_LENGTH) {
-                throw new RuntimeException("message length not allowed");
-            }
-            messageLength += (header[pos] & 0x7F) * multiplier;
-            multiplier *= 128;
-        } while ((header[pos] & 0x80) != 0);
-
-        return new FrameHeader(retain,
-                QoS.valueOf(qosVal),
-                isDuplicate,
-                MessageType.valueOf(msgType),
-                messageLength);
-    }
-
-    public static FrameHeader parseHeader(ByteBuf buf) {
-        int pos = 0;
-        byte currentByte = buf.readByte();
+        headerBuf.markReaderIndex();
+        byte currentByte = headerBuf.readByte();
         boolean retain = ((currentByte & 0x01) == 1);
         int qosVal = (currentByte >> 1) & 0x03;
         boolean isDuplicate = (((currentByte >> 3) & 0x01) == 1);
@@ -110,7 +90,14 @@ public class FrameHeader {
             if (pos == FIXED_HEADER_MAX_LENGTH) {
                 throw new RuntimeException("message length not allowed");
             }
-            currentByte = buf.readByte();
+            if (!headerBuf.isReadable()) {
+                /*
+                 * Reached end of buffer before reading the complete frame header.
+                 */
+                headerBuf.resetReaderIndex();
+                return null;
+            }
+            currentByte = headerBuf.readByte();
             messageLength += (currentByte & 0x7F) * multiplier;
             multiplier *= 128;
         } while ((currentByte & 0x80) != 0);

@@ -10,15 +10,14 @@ import io.netty.channel.socket.nio.NioSocketChannel;
 public class AMQConnectionFactory {
 
     private EventLoopGroup group = null;
-    private Bootstrap b;
+    private Bootstrap bootStrap;
     public void initialize() {
          group = new NioEventLoopGroup();
         try {
-            b = new Bootstrap();
-            b.group(group)
+            bootStrap = new Bootstrap();
+            bootStrap.group(group)
              .channel(NioSocketChannel.class);
-
-            b.handler(new AMQChannelInitializer());
+            bootStrap.handler(new AMQChannelInitializerFactory().createChannelInitializer());
         } finally {
         }
     }
@@ -31,16 +30,14 @@ public class AMQConnectionFactory {
 
     public AMQConnection createConnection(String host) {
         try {
-             ChannelFuture f = b.connect(host, AMQConnectionConstants.MQTT_PORT).sync();
+             ChannelFuture f = bootStrap.connect(host, AMQConnectionConstants.MQTT_PORT).sync();
              Channel ch = f.sync().channel();
-             System.out.println("Connected");
              Thread.sleep(2000);
              AMQConnection connection = new AMQConnection(ch);
              connection.initiateHandshake();
              return connection;
         } catch (InterruptedException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            Thread.currentThread().interrupt();
         } finally {
         }
         return null;

@@ -11,8 +11,7 @@ import net.aspenmq.transport.frame.FrameHeader;
 import net.aspenmq.transport.frame.FrameHeader.QoS;
 import net.aspenmq.transport.frame.MessageType;
 
-
-public class ConnectAck {
+public class ConnectAck  implements ProtocolMessage {
     public static final int CONNECTION_ACCEPTED = 0x00;
     public static final int ERROR_PROTOCOL_VERSION = 0x01;
     public static final int ERROR_IDENTIFIER_REJECTED = 0x02;
@@ -28,7 +27,8 @@ public class ConnectAck {
         this.returnCode = returnCode;
     }
 
-    ByteBuf encode() throws IOException {
+    @Override
+    public ByteBuf encode() throws IOException {
         FrameHeader frameHeader = new FrameHeader(false,
                 QoS.QOS_RESERVED,
                 false,
@@ -46,7 +46,7 @@ public class ConnectAck {
         return buf;
     }
 
-    static ConnectAck decode(ByteBuf buf) throws IOException {
+    public static ConnectAck decode(ByteBuf buf) throws IOException {
         ConnectAck connack = new ConnectAck();
         ByteBufInputStream bis = new ByteBufInputStream(buf);
         bis.readByte();

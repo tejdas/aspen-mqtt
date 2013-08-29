@@ -25,10 +25,12 @@ public class AMQConnection {
         connectHeaderIn.setKeepAliveDuration(30);
         try {
             ByteBuf buf = connectHeaderIn.encode();
-            channel.writeAndFlush(buf);
+            channel.writeAndFlush(buf).sync();
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } catch (InterruptedException e) {
+            Thread.currentThread().interrupt();
         }
     }
     public void close() {
@@ -38,6 +40,5 @@ public class AMQConnection {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         }
-        System.out.println("Closed");
     }
 }

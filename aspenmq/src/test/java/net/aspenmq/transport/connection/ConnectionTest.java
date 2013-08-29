@@ -5,13 +5,16 @@ public class ConnectionTest {
         AMQListener listener = new AMQListener();
         listener.start();
 
-        AMQConnectionFactory cf = new AMQConnectionFactory();
-        cf.initialize();
-        AMQConnection connection = cf.createConnection("localhost");
-        Thread.sleep(5000);
-        connection.close();
-        cf.shutdown();
-        Thread.sleep(5000);
-        listener.shutdown();
+        try {
+            AMQConnectionFactory cf = new AMQConnectionFactory();
+            cf.initialize();
+            AMQConnection connection = cf.createConnection("localhost");
+            Thread.sleep(10000);
+            connection.close();
+            cf.shutdown();
+            Thread.sleep(5000);
+        } finally {
+            listener.shutdown();
+        }
     }
 }
