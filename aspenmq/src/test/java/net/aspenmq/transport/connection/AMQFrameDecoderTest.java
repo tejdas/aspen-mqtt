@@ -124,14 +124,14 @@ public class AMQFrameDecoderTest {
         Thread.sleep(2000);
 
         Connect connectHeaderIn = new Connect();
-        connectHeaderIn.setKeepAliveDuration(30);
-        connectHeaderIn.setUserName("ihffhwpfhfwphpwfhfwphifpwhwpfhfphwfphfphfphfwpfwhpfwhfwphfwph");
-        connectHeaderIn.setPassword("ihffhwpfhfwphpwfhfwphifpwhwpfhfphwfphfphfphfwpfwhpfwhfwphfwph");
-        connectHeaderIn.setWillTopic("ihffhwpfhfwphpwfhfwphifpwhwpfhfphwfphfphfphfwpfwhpfwhfwphfwph");
+        connectHeaderIn.keepAliveDuration_$eq(30);
+        connectHeaderIn.userName_$eq(RandomStringUtils.randomAlphanumeric(64));
+        connectHeaderIn.password_$eq(RandomStringUtils.randomAlphanumeric(64));
+        connectHeaderIn.willTopic_$eq(RandomStringUtils.randomAlphanumeric(64));
 
         ByteBuf buf = connectHeaderIn.encode();
 
-        ConnectAck connack = new ConnectAck();
+        ConnectAck connack = new ConnectAck(ConnectAck.CONNECTION_ACCEPTED());
         ByteBuf buf2 = connack.encode();
         ByteBuf composite = Unpooled.wrappedBuffer(buf, buf2, buf);
         channel.writeAndFlush(composite).sync();
@@ -152,14 +152,14 @@ public class AMQFrameDecoderTest {
         Thread.sleep(2000);
 
         Connect connectHeaderIn = new Connect();
-        connectHeaderIn.setKeepAliveDuration(30);
-        connectHeaderIn.setUserName(RandomStringUtils.randomAlphanumeric(64));
-        connectHeaderIn.setPassword(RandomStringUtils.randomAlphanumeric(64));
-        connectHeaderIn.setWillTopic(RandomStringUtils.randomAlphanumeric(64));
+        connectHeaderIn.keepAliveDuration_$eq(30);
+        connectHeaderIn.userName_$eq(RandomStringUtils.randomAlphanumeric(64));
+        connectHeaderIn.password_$eq(RandomStringUtils.randomAlphanumeric(64));
+        connectHeaderIn.willTopic_$eq(RandomStringUtils.randomAlphanumeric(64));
 
         ByteBuf buf = connectHeaderIn.encode();
 
-        ConnectAck connack = new ConnectAck();
+        ConnectAck connack = new ConnectAck(ConnectAck.CONNECTION_ACCEPTED());
         ByteBuf buf2 = connack.encode();
         ByteBuf composite = Unpooled.wrappedBuffer(buf, buf2, buf, buf2, buf);
 
@@ -188,10 +188,10 @@ public class AMQFrameDecoderTest {
         Thread.sleep(2000);
 
         Connect connectHeaderIn = new Connect();
-        connectHeaderIn.setKeepAliveDuration(30);
-        connectHeaderIn.setUserName(RandomStringUtils.randomAlphanumeric(64));
-        connectHeaderIn.setPassword(RandomStringUtils.randomAlphanumeric(64));
-        connectHeaderIn.setWillTopic(RandomStringUtils.randomAlphanumeric(64));
+        connectHeaderIn.keepAliveDuration_$eq(30);
+        connectHeaderIn.userName_$eq(RandomStringUtils.randomAlphanumeric(64));
+        connectHeaderIn.password_$eq(RandomStringUtils.randomAlphanumeric(64));
+        connectHeaderIn.willTopic_$eq(RandomStringUtils.randomAlphanumeric(64));
 
         ByteBuf buf = connectHeaderIn.encode();
         ByteBuf buf4 = Unpooled.buffer(2);
@@ -205,7 +205,7 @@ public class AMQFrameDecoderTest {
         Thread.sleep(1000);
         channel.writeAndFlush(buf).sync();
 
-        ConnectAck connack = new ConnectAck();
+        ConnectAck connack = new ConnectAck(ConnectAck.CONNECTION_ACCEPTED());
         ByteBuf buf2 = connack.encode();
         channel.writeAndFlush(buf2).sync();
 

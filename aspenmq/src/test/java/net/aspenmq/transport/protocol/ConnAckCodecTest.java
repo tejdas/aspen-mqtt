@@ -23,14 +23,13 @@ public class ConnAckCodecTest extends TestCase {
 
     @Test
     public void testCodec() throws IOException {
-        connectAckCodecTest(ConnectAck.ERROR_BAD_CREDENTIALS);
-        connectAckCodecTest(ConnectAck.ERROR_PROTOCOL_VERSION);
-        connectAckCodecTest(ConnectAck.CONNECTION_ACCEPTED);
+        connectAckCodecTest(ConnectAck.ERROR_BAD_CREDENTIALS());
+        connectAckCodecTest(ConnectAck.ERROR_PROTOCOL_VERSION());
+        connectAckCodecTest(ConnectAck.CONNECTION_ACCEPTED());
     }
 
     private void connectAckCodecTest(int returnCode) throws IOException {
-        ConnectAck connectHeaderIn = new ConnectAck();
-        connectHeaderIn.setReturnCode(returnCode);
+        ConnectAck connectHeaderIn = new ConnectAck(returnCode);
         ByteBuf buf = connectHeaderIn.encode();
         FrameHeader frameHeader = FrameHeader.parseHeader(buf);
         assertTrue(frameHeader != null);
@@ -42,6 +41,6 @@ public class ConnAckCodecTest extends TestCase {
     }
 
     private static void assertConnectAck(ConnectAck in, ConnectAck out) {
-        assertEquals(in.getReturnCode(), out.getReturnCode());
+        assertEquals(in.returnCode(), out.returnCode());
     }
 }

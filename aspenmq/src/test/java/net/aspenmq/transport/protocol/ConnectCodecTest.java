@@ -38,19 +38,19 @@ public class ConnectCodecTest extends TestCase {
             String willTopic,
             boolean willRetain) throws IOException {
         Connect connectHeaderIn = new Connect();
-        connectHeaderIn.setKeepAliveDuration(keepAliveDuration);
+        connectHeaderIn.keepAliveDuration_$eq(keepAliveDuration);
         if (user != null) {
-            connectHeaderIn.setUserName(user);
+            connectHeaderIn.userName_$eq(user);
         }
         if (pwd != null) {
-            connectHeaderIn.setPassword(pwd);
+            connectHeaderIn.password_$eq(pwd);
         }
-        connectHeaderIn.setWillFlag(true);
-        connectHeaderIn.setWillQoS(willQoS);
+        connectHeaderIn.willFlag_$eq(true);
+        connectHeaderIn.willQoS_$eq(willQoS);
         if (willTopic != null) {
-            connectHeaderIn.setWillTopic(willTopic);
+            connectHeaderIn.willTopic_$eq(willTopic);
         }
-        connectHeaderIn.setWillRetain(willRetain);
+        connectHeaderIn.willRetain_$eq(willRetain);
 
         ByteBuf buf = connectHeaderIn.encode();
         FrameHeader frameHeader = FrameHeader.parseHeader(buf);
@@ -64,15 +64,15 @@ public class ConnectCodecTest extends TestCase {
     }
 
     private static void assertConnect(Connect in, Connect out) {
-        assertEquals(in.getClientId(), out.getClientId());
-        assertEquals(in.getKeepAliveDuration(), out.getKeepAliveDuration());
-        assertEquals(in.getPassword(), out.getPassword());
-        assertEquals(in.getUserName(), out.getUserName());
-        assertEquals(in.getWillMessage(), out.getWillMessage());
-        assertEquals(in.getWillTopic(), out.getWillTopic());
-        assertEquals(in.getWillQoS().qosVal(), out.getWillQoS().qosVal());
+        assertEquals(in.clientId(), out.clientId());
+        assertEquals(in.keepAliveDuration(), out.keepAliveDuration());
+        assertEquals(in.password(), out.password());
+        assertEquals(in.userName(), out.userName());
+        assertEquals(in.willMessage(), out.willMessage());
+        assertEquals(in.willTopic(), out.willTopic());
+        assertEquals(in.willQoS().qosVal(), out.willQoS().qosVal());
         assertEquals(in.isCleanSession(), out.isCleanSession());
-        assertEquals(in.isWillFlag(), out.isWillFlag());
-        assertEquals(in.isWillRetain(), out.isWillRetain());
+        assertEquals(in.willFlag(), out.willFlag());
+        assertEquals(in.willRetain(), out.willRetain());
     }
 }

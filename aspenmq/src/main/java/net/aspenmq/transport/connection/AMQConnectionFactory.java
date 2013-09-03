@@ -34,7 +34,7 @@ public class AMQConnectionFactory {
              Channel ch = f.sync().channel();
              Thread.sleep(2000);
              AMQConnection connection = new AMQConnection(ch);
-             connection.initiateHandshake();
+             connection.performHandshake();
              return connection;
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
