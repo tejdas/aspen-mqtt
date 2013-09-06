@@ -3,15 +3,16 @@ package net.aspenmq.transport.connection
 import io.netty.buffer.ByteBuf
 import io.netty.channel.ChannelHandlerContext
 import io.netty.handler.codec.ByteToMessageDecoder
-import net.aspenmq.transport.frame.{FrameHeader, MessageType}
 import net.aspenmq.transport.protocol.{Connect, ConnectAck, ProtocolMessage}
+import net.aspenmq.transport.frame.SFrameHeader
+import net.aspenmq.transport.frame.SMessageType
 
 class AMQFrameDecoder extends ByteToMessageDecoder {
-  private var amqMessageInProgress: FrameHeader = null
+  private var amqMessageInProgress: SFrameHeader = null
 
   override def decode(ctx: ChannelHandlerContext, buf: ByteBuf, frames: java.util.List[Object]): Unit = {
     if (amqMessageInProgress == null) {
-      val frameHeader = FrameHeader.parseHeader(buf);
+      val frameHeader = SFrameHeader.parseHeader(buf);
       if (frameHeader != null) {
         amqMessageInProgress = frameHeader
       } else {
@@ -20,8 +21,8 @@ class AMQFrameDecoder extends ByteToMessageDecoder {
       }
     }
 
-    if (buf.readableBytes() >= amqMessageInProgress.getMessageLength()) {
-      val body = decodeFrame(amqMessageInProgress.getMessageType(), buf)
+    if (buf.readableBytes() >= amqMessageInProgress.messageLength) {
+      val body = decodeFrame(amqMessageInProgress.messageType, buf)
       frames.add(new AMQMessage(amqMessageInProgress, body))
       amqMessageInProgress = null
     } else {
@@ -32,10 +33,10 @@ class AMQFrameDecoder extends ByteToMessageDecoder {
   override def decodeLast(ctx: ChannelHandlerContext, in: ByteBuf, out: java.util.List[Object]): Unit = {
   }
 
-  private def decodeFrame(msgType: MessageType, buf: ByteBuf): ProtocolMessage = {
+  private def decodeFrame(msgType: SMessageType.Value, buf: ByteBuf): ProtocolMessage = {
     msgType match {
-      case MessageType.CONNECT => Connect.decode(buf)
-      case MessageType.CONNACK => ConnectAck.decode(buf)
+      case SMessageType.CONNECT => Connect.decode(buf)
+      case SMessageType.CONNACK => ConnectAck.decode(buf)
       case _ => null
     }
   }

@@ -1,7 +1,9 @@
 package net.aspenmq.transport.protocol
 
 import io.netty.buffer.{ByteBuf, ByteBufInputStream, ByteBufOutputStream, Unpooled}
-import net.aspenmq.transport.frame.{FrameHeader, MessageType}
+import net.aspenmq.transport.frame.SFrameHeader
+import net.aspenmq.transport.frame.SMessageType
+import net.aspenmq.transport.frame.SQoS
 
 object ConnectAck {
   val CONNECTION_ACCEPTED = 0x00
@@ -25,8 +27,8 @@ object ConnectAck {
 
 class ConnectAck(val returnCode: Int) extends ProtocolMessage {
   override def encode(): ByteBuf = {
-    val frameHeader = new FrameHeader(false, FrameHeader.QoS.QOS_RESERVED, false, MessageType.CONNACK, 2)
-    val headerBuf = new Array[Byte](FrameHeader.FIXED_HEADER_MIN_LENGTH)
+    val frameHeader = new SFrameHeader(false, SQoS.QOS_RESERVED, false, SMessageType.CONNACK, 2)
+    val headerBuf = new Array[Byte](SFrameHeader.FIXED_HEADER_MIN_LENGTH)
     val headerLength = frameHeader.marshalHeader(headerBuf)
 
     val buf = Unpooled.buffer(4)

@@ -1,9 +1,9 @@
 package net.aspenmq.transport.protocol
 
 import io.netty.buffer.ByteBuf
-import net.aspenmq.transport.frame.{FrameHeader, MessageType}
 import io.netty.buffer.Unpooled
+import net.aspenmq.transport.frame.SMessageType
 
 class Disconnect extends FixedHeaderProtocolMessage {
-  override def messageType = MessageType.DISCONNECT
+  override def messageType = SMessageType.DISCONNECT
 }

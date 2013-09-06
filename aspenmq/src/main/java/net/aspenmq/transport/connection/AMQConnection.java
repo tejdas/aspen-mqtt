@@ -6,7 +6,7 @@ import io.netty.channel.ChannelFuture;
 
 import java.util.UUID;
 
-import net.aspenmq.transport.frame.MessageType;
+import net.aspenmq.transport.frame.SMessageType;
 import net.aspenmq.transport.protocol.Connect;
 import net.aspenmq.transport.protocol.ConnectAck;
 
@@ -85,7 +85,7 @@ public class AMQConnection {
     }
 
     void processProtocolMessage(AMQMessage protocolMessage) {
-        if (protocolMessage.frameHeader().getMessageType() == MessageType.CONNACK) {
+        if (protocolMessage.frameHeader().messageType() == SMessageType.CONNACK()) {
             SAMQConnectionManager.registerConnection(clientID, this);
             handshakeComplete();
         } else {

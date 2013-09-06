@@ -1,8 +1,8 @@
 package net.aspenmq.transport.protocol
 
 import io.netty.buffer.ByteBuf
-import net.aspenmq.transport.frame.MessageType
+import net.aspenmq.transport.frame.SMessageType
 
 class PingRequest extends FixedHeaderProtocolMessage {
-  override def messageType = MessageType.PINGREQ
+  override def messageType = SMessageType.PINGREQ
 }

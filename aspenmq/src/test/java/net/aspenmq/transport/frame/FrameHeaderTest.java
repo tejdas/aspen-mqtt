@@ -6,9 +6,10 @@ import io.netty.buffer.Unpooled;
 import java.util.Arrays;
 
 import junit.framework.TestCase;
-import net.aspenmq.transport.frame.FrameHeader.QoS;
 
 import org.junit.Test;
+
+import scala.Enumeration.Value;
 
 public class FrameHeaderTest extends TestCase {
     @Override
@@ -24,30 +25,30 @@ public class FrameHeaderTest extends TestCase {
     @Test
     public void testMQTTFixedHeaderCodec() {
         testAndAssertFrameHeader(true,
-                QoS.QOS_ATLEAST_ONCE,
+                SQoS.QOS_ATLEAST_ONCE(),
                 false,
-                MessageType.CONNECT,
+                SMessageType.CONNECT(),
                 89);
         testAndAssertFrameHeader(false,
-                QoS.QOS_EXACTLY_ONCE,
+                SQoS.QOS_EXACTLY_ONCE(),
                 true,
-                MessageType.PUBLISH,
+                SMessageType.PUBLISH(),
                 9932);
         testAndAssertFrameHeader(false,
-                QoS.QOS_ATMOST_ONCE,
+                SQoS.QOS_ATMOST_ONCE(),
                 false,
-                MessageType.PUBLISH,
+                SMessageType.PUBLISH(),
                 25372);
         testAndAssertFrameHeader(true,
-                QoS.QOS_ATMOST_ONCE,
+                SQoS.QOS_ATMOST_ONCE(),
                 true,
-                MessageType.PUBLISH,
+                SMessageType.PUBLISH(),
                 123678954);
         try {
             testAndAssertFrameHeader(true,
-                    QoS.QOS_EXACTLY_ONCE,
+                    SQoS.QOS_EXACTLY_ONCE(),
                     true,
-                    MessageType.PUBLISH,
+                    SMessageType.PUBLISH(),
                     423678954);
             fail("Expected IllegalArgumentException");
         } catch (IllegalArgumentException ignore) {
@@ -67,9 +68,9 @@ public class FrameHeaderTest extends TestCase {
         int pos = 0;
         header[pos] &= 0;
         header[pos] |= 0x01;
-        header[pos] |= (QoS.QOS_ATLEAST_ONCE.qosVal() << 1);
+        header[pos] |= (SQoS.QOS_ATLEAST_ONCE().id() << 1);
         header[pos] |= 0x08;
-        header[pos] |= (MessageType.PUBLISH.type() << 4);
+        header[pos] |= (SMessageType.PUBLISH().id() << 4);
 
         int messageLength = msgLen;
         do {
@@ -84,19 +85,19 @@ public class FrameHeaderTest extends TestCase {
 
         try {
             ByteBuf headerBuf = Unpooled.copiedBuffer(header);
-            FrameHeader.parseHeader(headerBuf);
+            SFrameHeader.parseHeader(headerBuf);
             fail("Expected RuntimeException");
         } catch (RuntimeException ignore) {
         }
     }
 
     private static void testAndAssertFrameHeader(boolean retain,
-            QoS qos,
+            Value qos,
             boolean isDuplicate,
-            MessageType msgType,
+            Value msgType,
             int msgLen) {
-        byte[] header = new byte[FrameHeader.FIXED_HEADER_MAX_LENGTH];
-        FrameHeader frameHeaderIn = new FrameHeader(retain,
+        byte[] header = new byte[SFrameHeader.FIXED_HEADER_MAX_LENGTH()];
+        SFrameHeader frameHeaderIn = new SFrameHeader(retain,
                 qos,
                 isDuplicate,
                 msgType,
@@ -104,15 +105,15 @@ public class FrameHeaderTest extends TestCase {
         frameHeaderIn.marshalHeader(header);
 
         ByteBuf headerBuf = Unpooled.copiedBuffer(header);
-        FrameHeader frameHeaderOut = FrameHeader.parseHeader(headerBuf);
+        SFrameHeader frameHeaderOut = SFrameHeader.parseHeader(headerBuf);
         assertFrameHeader(frameHeaderIn, frameHeaderOut);
     }
 
-    private static void assertFrameHeader(FrameHeader in, FrameHeader out) {
-        assertEquals(in.isDuplicate(), out.isDuplicate());
-        assertEquals(in.isRetain(), out.isRetain());
-        assertEquals(in.getMessageType(), out.getMessageType());
-        assertEquals(in.getQos(), out.getQos());
-        assertEquals(in.getMessageLength(), out.getMessageLength());
+    private static void assertFrameHeader(SFrameHeader in, SFrameHeader out) {
+        assertEquals(in.duplicate(), out.duplicate());
+        assertEquals(in.retain(), out.retain());
+        assertEquals(in.messageType().id(), out.messageType().id());
+        assertEquals(in.qos(), out.qos());
+        assertEquals(in.messageLength(), out.messageLength());
     }
 }

@@ -5,11 +5,13 @@ import io.netty.buffer.ByteBuf;
 import java.io.IOException;
 
 import junit.framework.TestCase;
-import net.aspenmq.transport.frame.FrameHeader;
-import net.aspenmq.transport.frame.FrameHeader.QoS;
-import net.aspenmq.transport.frame.MessageType;
+import net.aspenmq.transport.frame.SFrameHeader;
+import net.aspenmq.transport.frame.SMessageType;
+import net.aspenmq.transport.frame.SQoS;
 
 import org.junit.Test;
+
+import scala.Enumeration.Value;
 
 public class ConnectCodecTest extends TestCase {
     @Override
@@ -24,17 +26,17 @@ public class ConnectCodecTest extends TestCase {
 
     @Test
     public void testCodec() throws IOException {
-        connectCodecTest(45, "testuser", "testpwd", true, QoS.QOS_ATMOST_ONCE, "randomTopic", false);
-        connectCodecTest(9314, "testuser", "testpwd", true, QoS.QOS_EXACTLY_ONCE, null, true);
-        connectCodecTest(9314, "testuser", "testpwd", false, QoS.QOS_ATLEAST_ONCE, "foobar", true);
-        connectCodecTest(5982, null, null, true, QoS.QOS_ATMOST_ONCE, "randomTopic", true);
+        connectCodecTest(45, "testuser", "testpwd", true, SQoS.QOS_ATMOST_ONCE(), "randomTopic", false);
+        connectCodecTest(9314, "testuser", "testpwd", true, SQoS.QOS_EXACTLY_ONCE(), null, true);
+        connectCodecTest(9314, "testuser", "testpwd", false, SQoS.QOS_ATLEAST_ONCE(), "foobar", true);
+        connectCodecTest(5982, null, null, true, SQoS.QOS_ATMOST_ONCE(), "randomTopic", true);
     }
 
     private void connectCodecTest(int keepAliveDuration,
             String user,
             String pwd,
             boolean willFlag,
-            QoS willQoS,
+            Value willQoS,
             String willTopic,
             boolean willRetain) throws IOException {
         Connect connectHeaderIn = new Connect();
@@ -53,10 +55,10 @@ public class ConnectCodecTest extends TestCase {
         connectHeaderIn.willRetain_$eq(willRetain);
 
         ByteBuf buf = connectHeaderIn.encode();
-        FrameHeader frameHeader = FrameHeader.parseHeader(buf);
+        SFrameHeader frameHeader = SFrameHeader.parseHeader(buf);
         assertTrue(frameHeader != null);
-        assertEquals(frameHeader.getMessageType(), MessageType.CONNECT);
-        assertEquals(frameHeader.getMessageLength(), buf.readableBytes());
+        assertEquals(frameHeader.messageType(), SMessageType.CONNECT());
+        assertEquals(frameHeader.messageLength(), buf.readableBytes());
         System.out.println(buf.readableBytes());
 
         Connect connectHeaderOut = Connect.decode(buf);
@@ -70,7 +72,7 @@ public class ConnectCodecTest extends TestCase {
         assertEquals(in.userName(), out.userName());
         assertEquals(in.willMessage(), out.willMessage());
         assertEquals(in.willTopic(), out.willTopic());
-        assertEquals(in.willQoS().qosVal(), out.willQoS().qosVal());
+        assertEquals(in.willQoS(), out.willQoS());
         assertEquals(in.isCleanSession(), out.isCleanSession());
         assertEquals(in.willFlag(), out.willFlag());
         assertEquals(in.willRetain(), out.willRetain());

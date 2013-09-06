@@ -5,8 +5,8 @@ import io.netty.buffer.ByteBuf;
 import java.io.IOException;
 
 import junit.framework.TestCase;
-import net.aspenmq.transport.frame.FrameHeader;
-import net.aspenmq.transport.frame.MessageType;
+import net.aspenmq.transport.frame.SFrameHeader;
+import net.aspenmq.transport.frame.SMessageType;
 
 import org.junit.Test;
 
@@ -31,10 +31,10 @@ public class ConnAckCodecTest extends TestCase {
     private void connectAckCodecTest(int returnCode) throws IOException {
         ConnectAck connectHeaderIn = new ConnectAck(returnCode);
         ByteBuf buf = connectHeaderIn.encode();
-        FrameHeader frameHeader = FrameHeader.parseHeader(buf);
+        SFrameHeader frameHeader = SFrameHeader.parseHeader(buf);
         assertTrue(frameHeader != null);
-        assertEquals(frameHeader.getMessageType(), MessageType.CONNACK);
-        assertEquals(frameHeader.getMessageLength(), buf.readableBytes());
+        assertEquals(frameHeader.messageType(), SMessageType.CONNACK());
+        assertEquals(frameHeader.messageLength(), buf.readableBytes());
 
         ConnectAck connectHeaderOut = ConnectAck.decode(buf);
         assertConnectAck(connectHeaderIn, connectHeaderOut);

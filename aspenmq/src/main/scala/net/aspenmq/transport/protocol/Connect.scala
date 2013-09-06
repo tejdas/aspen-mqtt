@@ -1,12 +1,11 @@
 package net.aspenmq.transport.protocol
 
 import java.util.UUID
-
 import org.apache.commons.lang.StringUtils
-
 import io.netty.buffer.{ByteBuf, ByteBufInputStream, ByteBufOutputStream, Unpooled}
-import net.aspenmq.transport.frame.{FrameHeader, MessageType}
-import net.aspenmq.transport.frame.FrameHeader.QoS
+import net.aspenmq.transport.frame.SFrameHeader
+import net.aspenmq.transport.frame.SQoS
+import net.aspenmq.transport.frame.SMessageType
 
 object Connect {
   val MQTT_PROTOCOL_NAME = "MQIsdp"
@@ -22,7 +21,7 @@ object Connect {
       connect.isCleanSession = ((flag & 0x02) == 0x02)
       connect.willFlag = ((flag & 0x04) == 0x04)
       if (connect.willFlag) {
-        connect.willQoS = QoS.valueOf(((flag >> 3) & 0x03))
+        connect.willQoS = SQoS.apply(((flag >> 3) & 0x03))
         connect.willRetain = ((flag & 0x20) == 0x20)
       }
 
@@ -52,7 +51,7 @@ class Connect extends ProtocolMessage {
   var keepAliveDuration = 0
   var isCleanSession = true
   var willFlag = false;
-  var willQoS = QoS.QOS_RESERVED
+  var willQoS = SQoS.QOS_RESERVED
   var willRetain = false
   var clientId = StringUtils.EMPTY
   var willTopic = StringUtils.EMPTY
@@ -73,7 +72,7 @@ class Connect extends ProtocolMessage {
       }
       if (willFlag) {
         flag |= 0x04
-        flag |= (willQoS.qosVal() << 3)
+        flag |= (willQoS.id << 3)
         if (willRetain) {
           flag |= 0x20
         }
@@ -103,8 +102,8 @@ class Connect extends ProtocolMessage {
       bos.close()
     }
 
-    val frameHeader = new FrameHeader(false, QoS.QOS_RESERVED, false, MessageType.CONNECT, buf.readableBytes())
-    val headerBuf = new Array[Byte](FrameHeader.FIXED_HEADER_MAX_LENGTH)
+    val frameHeader = new SFrameHeader(false, SQoS.QOS_RESERVED, false, SMessageType.CONNECT, buf.readableBytes())
+    val headerBuf = new Array[Byte](SFrameHeader.FIXED_HEADER_MAX_LENGTH)
     val headerLength = frameHeader.marshalHeader(headerBuf)
     val conBuf = Unpooled.buffer(headerLength + buf.readableBytes())
     conBuf.writeBytes(headerBuf, 0, headerLength)

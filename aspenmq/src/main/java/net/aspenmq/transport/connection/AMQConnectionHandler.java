@@ -2,7 +2,7 @@ package net.aspenmq.transport.connection;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import net.aspenmq.transport.frame.MessageType;
+import net.aspenmq.transport.frame.SMessageType;
 import net.aspenmq.transport.protocol.Connect;
 
 public class AMQConnectionHandler extends ChannelInboundHandlerAdapter {
@@ -21,13 +21,13 @@ public class AMQConnectionHandler extends ChannelInboundHandlerAdapter {
             return;
         }
         AMQMessage message = (AMQMessage) msg;
-        if (message.frameHeader().getMessageType() == MessageType.CONNECT) {
+        if (message.frameHeader().messageType() == SMessageType.CONNECT()) {
             System.out.println("received CONNECT");
             Connect connect = (Connect) message.protocolMessage();
             connection = new AMQConnection(ctx.channel(), this);
             connection.processConnect(connect);
         } else {
-            System.out.println("received protocolMessage:" + message.frameHeader().getMessageType());
+            System.out.println("received protocolMessage:" + message.frameHeader().messageType());
             connection.processProtocolMessage(message);
         }
     }
