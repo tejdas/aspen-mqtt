@@ -1,7 +1,5 @@
 package net.aspenmq.transport.connection
 
-import scala.collection.mutable.ListBuffer
-
 import io.netty.channel.{ChannelHandler, ChannelInitializer}
 import io.netty.channel.socket.SocketChannel
 
