@@ -1,24 +1,23 @@
 package net.aspenmq.transport.protocol
 
-import io.netty.buffer.ByteBuf
 import scala.collection.mutable.ListBuffer
-import net.aspenmq.transport.frame.SQoS
+import io.netty.buffer.ByteBuf
 import io.netty.buffer.Unpooled
 import io.netty.buffer.ByteBufOutputStream
 import net.aspenmq.transport.frame.SFrameHeader
+import net.aspenmq.transport.frame.SQoS
 import net.aspenmq.transport.frame.SMessageType
 import io.netty.buffer.ByteBufInputStream
 
-object Subscribe {
-    def decode(buf: ByteBuf): Subscribe = {
+object Unsubscribe {
+    def decode(buf: ByteBuf): Unsubscribe = {
     val bis = new ByteBufInputStream(buf)
     try {
       val messageId = bis.readShort()
-      val sub = new Subscribe(messageId)
+      val sub = new Unsubscribe(messageId)
       while (buf.isReadable()) {
         val topicName = bis.readUTF()
-        val qos = bis.readByte()
-        sub.addTopic(SQoS.apply(qos), topicName)
+        sub.addTopic(topicName)
       }
       sub
     } finally {
@@ -27,12 +26,10 @@ object Subscribe {
   }
 }
 
-class Subscribe(val messsageId: Int) extends ProtocolMessage with VariableHeaderEncoder {
-  val topics = ListBuffer[(SQoS.Value, String)]()
+class Unsubscribe(val messsageId: Int) extends ProtocolMessage with VariableHeaderEncoder {
+  val topics = ListBuffer[String]()
 
-  def addTopic(qos: SQoS.Value, topicName: String):Unit = {
-    topics += ((qos, topicName))
-  }
+  def addTopic(topicName: String):Unit = topics += topicName
 
   def getTopics() = topics.toList
 
@@ -41,15 +38,12 @@ class Subscribe(val messsageId: Int) extends ProtocolMessage with VariableHeader
     val bos = new ByteBufOutputStream(buf)
     try {
       bos.writeShort(this.messsageId)
-      topics.foreach(topicDetails => {
-        bos.writeUTF(topicDetails._2)
-        bos.writeByte(topicDetails._1.id)
-      })
+      topics.foreach(topic => bos.writeUTF(topic))
       bos.flush()
     } finally {
       bos.close()
     }
-    val frameHeader = new SFrameHeader(false, SQoS.QOS_ATLEAST_ONCE, duplicate, SMessageType.SUBSCRIBE, buf.readableBytes())
+    val frameHeader = new SFrameHeader(false, SQoS.QOS_ATLEAST_ONCE, duplicate, SMessageType.UNSUBSCRIBE, buf.readableBytes())
     super.encode(frameHeader, buf)
   }
 }

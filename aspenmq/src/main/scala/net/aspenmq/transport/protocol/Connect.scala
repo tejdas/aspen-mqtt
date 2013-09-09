@@ -59,7 +59,7 @@ class Connect extends ProtocolMessage {
   var userName = StringUtils.EMPTY
   var password = StringUtils.EMPTY
 
-  override def encode(): ByteBuf = {
+  def encode(): ByteBuf = {
     val buf = Unpooled.buffer(256)
     val bos = new ByteBufOutputStream(buf)
     try {

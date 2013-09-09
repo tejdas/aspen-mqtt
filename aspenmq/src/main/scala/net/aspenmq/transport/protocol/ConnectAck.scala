@@ -25,14 +25,9 @@ object ConnectAck {
   }
 }
 
-class ConnectAck(val returnCode: Int) extends ProtocolMessage {
-  override def encode(): ByteBuf = {
-    val frameHeader = new SFrameHeader(false, SQoS.QOS_RESERVED, false, SMessageType.CONNACK, 2)
-    val headerBuf = new Array[Byte](SFrameHeader.FIXED_HEADER_MIN_LENGTH)
-    val headerLength = frameHeader.marshalHeader(headerBuf)
-
-    val buf = Unpooled.buffer(4)
-    buf.writeBytes(headerBuf, 0, headerLength)
+class ConnectAck(val returnCode: Int) extends ProtocolMessage with VariableHeaderEncoder {
+  def encode(): ByteBuf = {
+    val buf = Unpooled.buffer(2)
     val bos = new ByteBufOutputStream(buf)
     try {
       bos.writeByte(0)
@@ -41,6 +36,7 @@ class ConnectAck(val returnCode: Int) extends ProtocolMessage {
     } finally {
       bos.close()
     }
-    buf
+    val frameHeader = new SFrameHeader(false, SQoS.QOS_RESERVED, false, SMessageType.CONNACK, 2)
+    super.encode(frameHeader, buf)
   }
 }
