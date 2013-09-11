@@ -9,10 +9,10 @@ public class ConnectionTest {
             AMQConnectionFactory cf = new AMQConnectionFactory();
             cf.initialize();
             AMQConnection connection = cf.createConnection("localhost");
-            Thread.sleep(10000);
+            Thread.sleep(1000);
             connection.close();
             cf.shutdown();
-            Thread.sleep(5000);
+            Thread.sleep(2000);
         } finally {
             listener.shutdown();
         }

@@ -1,6 +1,6 @@
 package net.aspenmq.transport.connection
 
-import io.netty.channel.{ChannelHandler, ChannelInitializer}
+import io.netty.channel.ChannelInitializer
 import io.netty.channel.socket.SocketChannel
 
 class AMQChannelInitializerFactory {

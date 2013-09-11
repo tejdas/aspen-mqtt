@@ -1,13 +1,12 @@
 package net.aspenmq.transport.frame
 
-import java.util.Arrays
 import io.netty.buffer.ByteBuf
 
 object SQoS extends Enumeration {
   val QOS_ATMOST_ONCE = Value(0)
   val QOS_ATLEAST_ONCE = Value(1)
   val QOS_EXACTLY_ONCE = Value(2)
-  val QOS_RESERVED = Value(4)
+  val QOS_RESERVED = Value(3)
 }
 
 object SMessageType extends Enumeration {
@@ -42,10 +41,10 @@ object SFrameHeader {
     var currentByte = headerBuf.readByte()
     val retain = ((currentByte & 0x01) == 1)
     val qosVal = (currentByte >> 1) & 0x03
-    val isDuplicate = (((currentByte >> 3) & 0x01) == 1)
+    val duplicate = (((currentByte >> 3) & 0x01) == 1)
     val msgType = (currentByte >> 4) & 0x0F
 
-    var messageLength = 0 // TODO
+    var messageLength = 0
     var multiplier = 1
     var pos = 0
     do {
@@ -67,7 +66,7 @@ object SFrameHeader {
 
     new SFrameHeader(retain,
       SQoS.apply(qosVal),
-      isDuplicate,
+      duplicate,
       SMessageType.apply(msgType),
       messageLength)
   }
@@ -104,6 +103,6 @@ class SFrameHeader(val retain: Boolean, val qos: SQoS.Value, val duplicate: Bool
     if (msgLen > 0) {
       throw new IllegalArgumentException("message length not allowed: " + messageLength)
     }
-    return pos + 1
+    pos + 1
   }
 }

@@ -2,7 +2,7 @@ package net.aspenmq.transport.protocol
 
 import net.aspenmq.transport.frame.{SMessageType, SQoS}
 
-class UnsubscribeAck(val messageId: Int) extends AckProtocolMessage {
-  def messageType = SMessageType.UNSUBACK
+class PublishRec(val messageId: Int) extends AckProtocolMessage {
+  def messageType = SMessageType.PUBREC
   def qos = SQoS.QOS_RESERVED
 }

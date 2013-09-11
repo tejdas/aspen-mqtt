@@ -1,10 +1,9 @@
 package net.aspenmq.transport.connection
 
-import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.bootstrap.ServerBootstrap
+import io.netty.channel.{Channel, ChannelOption}
+import io.netty.channel.nio.NioEventLoopGroup
 import io.netty.channel.socket.nio.NioServerSocketChannel
-import io.netty.channel.ChannelOption
-import io.netty.channel.Channel
 
 object AMQListener {
   val listenAddress = "0.0.0.0"

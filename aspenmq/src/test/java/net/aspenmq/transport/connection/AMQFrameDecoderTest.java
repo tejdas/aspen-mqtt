@@ -19,8 +19,15 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import net.aspenmq.transport.frame.SQoS;
 import net.aspenmq.transport.protocol.Connect;
 import net.aspenmq.transport.protocol.ConnectAck;
+import net.aspenmq.transport.protocol.Disconnect;
+import net.aspenmq.transport.protocol.PingRequest;
+import net.aspenmq.transport.protocol.PingResponse;
+import net.aspenmq.transport.protocol.Publish;
+import net.aspenmq.transport.protocol.Subscribe;
+import net.aspenmq.transport.protocol.UnsubscribeAck;
 
 import org.apache.commons.lang.RandomStringUtils;
 import org.junit.After;
@@ -135,17 +142,18 @@ public class AMQFrameDecoderTest {
         ByteBuf buf2 = connack.encode();
         ByteBuf composite = Unpooled.wrappedBuffer(buf, buf2, buf);
         channel.writeAndFlush(composite).sync();
-        Thread.sleep(3000);
+        Thread.sleep(2000);
 
         ChannelFuture cf = channel.close();
         cf.sync();
-        Thread.sleep(5000);
+        Thread.sleep(1000);
         List<AMQMessage> messages = handler.getAndReset();
         assertEquals(3, messages.size());
     }
 
     @Test
-    public void testMultipleFrameChunksNotAllignedAtFrameBoundary() throws InterruptedException, IOException {
+    public void testMultipleFrameChunksNotAllignedAtFrameBoundary() throws InterruptedException,
+            IOException {
         ChannelFuture f = b.connect("localhost",
                 AMQConnectionConstants.MQTT_PORT).sync();
         Channel channel = f.sync().channel();
@@ -157,27 +165,57 @@ public class AMQFrameDecoderTest {
         connectHeaderIn.password_$eq(RandomStringUtils.randomAlphanumeric(64));
         connectHeaderIn.willTopic_$eq(RandomStringUtils.randomAlphanumeric(64));
 
-        ByteBuf buf = connectHeaderIn.encode();
+        ByteBuf connBuf = connectHeaderIn.encode();
+        ByteBuf connackBuf = new ConnectAck(ConnectAck.CONNECTION_ACCEPTED()).encode();
 
-        ConnectAck connack = new ConnectAck(ConnectAck.CONNECTION_ACCEPTED());
-        ByteBuf buf2 = connack.encode();
-        ByteBuf composite = Unpooled.wrappedBuffer(buf, buf2, buf, buf2, buf);
+        String payloadIn = RandomStringUtils.randomAlphanumeric(2048);
+        Publish pub = new Publish(12,
+                RandomStringUtils.randomAscii(64),
+                payloadIn.getBytes());
+        ByteBuf pubBuf = pub.encode(SQoS.QOS_ATLEAST_ONCE(), true, false);
+
+        Subscribe sub = new Subscribe(12);
+        sub.addTopic(SQoS.QOS_ATLEAST_ONCE(), RandomStringUtils.randomAscii(32));
+        sub.addTopic(SQoS.QOS_ATMOST_ONCE(), RandomStringUtils.randomAscii(32));
+        sub.addTopic(SQoS.QOS_EXACTLY_ONCE(), RandomStringUtils.randomAscii(32));
+        ByteBuf subBuf = sub.encode(true);
+
+        ByteBuf discBuf = new Disconnect().encode();
+
+        ByteBuf pingReqBuf = new PingRequest().encode();
+
+        ByteBuf pingRespBuf = new PingResponse().encode();
+
+        ByteBuf unsubAckBuf = new UnsubscribeAck(15).encode(true);
+
+        ByteBuf composite = Unpooled.wrappedBuffer(connBuf,
+                connackBuf,
+                subBuf,
+                pingReqBuf,
+                connackBuf,
+                subBuf,
+                discBuf,
+                pubBuf,
+                unsubAckBuf,
+                connackBuf,
+                pingRespBuf,
+                connBuf);
 
         while (composite.isReadable()) {
-        ByteBuf writeBuf = Unpooled.buffer(64);
-        if (composite.readableBytes() >= 64)
-            composite.readBytes(writeBuf);
-        else
-            composite.readBytes(writeBuf, composite.readableBytes());
-        channel.writeAndFlush(writeBuf).sync();
-        Thread.sleep(1000);
+            ByteBuf writeBuf = Unpooled.buffer(64);
+            if (composite.readableBytes() >= 64)
+                composite.readBytes(writeBuf);
+            else
+                composite.readBytes(writeBuf, composite.readableBytes());
+            channel.writeAndFlush(writeBuf).sync();
+            Thread.sleep(50);
         }
 
         ChannelFuture cf = channel.close();
         cf.sync();
         Thread.sleep(2000);
         List<AMQMessage> messages = handler.getAndReset();
-        assertEquals(5, messages.size());
+        assertEquals(12, messages.size());
     }
 
     @Test

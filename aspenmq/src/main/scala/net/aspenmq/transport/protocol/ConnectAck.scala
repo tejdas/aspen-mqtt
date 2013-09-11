@@ -1,9 +1,7 @@
 package net.aspenmq.transport.protocol
 
 import io.netty.buffer.{ByteBuf, ByteBufInputStream, ByteBufOutputStream, Unpooled}
-import net.aspenmq.transport.frame.SFrameHeader
-import net.aspenmq.transport.frame.SMessageType
-import net.aspenmq.transport.frame.SQoS
+import net.aspenmq.transport.frame.{SFrameHeader, SMessageType, SQoS}
 
 object ConnectAck {
   val CONNECTION_ACCEPTED = 0x00

@@ -1,13 +1,9 @@
 package net.aspenmq.transport.protocol
 
 import scala.collection.mutable.ListBuffer
-import io.netty.buffer.ByteBuf
-import io.netty.buffer.Unpooled
-import io.netty.buffer.ByteBufOutputStream
-import net.aspenmq.transport.frame.SFrameHeader
-import net.aspenmq.transport.frame.SQoS
-import net.aspenmq.transport.frame.SMessageType
-import io.netty.buffer.ByteBufInputStream
+
+import io.netty.buffer.{ByteBuf, ByteBufInputStream, ByteBufOutputStream, Unpooled}
+import net.aspenmq.transport.frame.{SFrameHeader, SMessageType, SQoS}
 
 object Unsubscribe {
     def decode(buf: ByteBuf): Unsubscribe = {
@@ -33,7 +29,7 @@ class Unsubscribe(val messsageId: Int) extends ProtocolMessage with VariableHead
 
   def getTopics() = topics.toList
 
-  def encode(duplicate:Boolean = false): ByteBuf = {
+  def encode(duplicate:Boolean): ByteBuf = {
     val buf = Unpooled.buffer(256)
     val bos = new ByteBufOutputStream(buf)
     try {

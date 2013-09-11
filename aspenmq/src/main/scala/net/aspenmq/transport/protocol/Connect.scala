@@ -1,11 +1,11 @@
 package net.aspenmq.transport.protocol
 
 import java.util.UUID
+
 import org.apache.commons.lang.StringUtils
+
 import io.netty.buffer.{ByteBuf, ByteBufInputStream, ByteBufOutputStream, Unpooled}
-import net.aspenmq.transport.frame.SFrameHeader
-import net.aspenmq.transport.frame.SQoS
-import net.aspenmq.transport.frame.SMessageType
+import net.aspenmq.transport.frame.{SFrameHeader, SMessageType, SQoS}
 
 object Connect {
   val MQTT_PROTOCOL_NAME = "MQIsdp"
@@ -47,7 +47,7 @@ object Connect {
   }
 }
 
-class Connect extends ProtocolMessage {
+class Connect extends ProtocolMessage with VariableHeaderEncoder {
   var keepAliveDuration = 0
   var isCleanSession = true
   var willFlag = false;
@@ -102,13 +102,7 @@ class Connect extends ProtocolMessage {
       bos.close()
     }
 
-    val frameHeader = new SFrameHeader(false, SQoS.QOS_RESERVED, false, SMessageType.CONNECT, buf.readableBytes())
-    val headerBuf = new Array[Byte](SFrameHeader.FIXED_HEADER_MAX_LENGTH)
-    val headerLength = frameHeader.marshalHeader(headerBuf)
-    val conBuf = Unpooled.buffer(headerLength + buf.readableBytes())
-    conBuf.writeBytes(headerBuf, 0, headerLength)
-    conBuf.writeBytes(buf, buf.readableBytes())
-
-    conBuf
+    val frameHeader = new SFrameHeader(false, SQoS.QOS_ATLEAST_ONCE, false, SMessageType.CONNECT, buf.readableBytes())
+    super.encode(frameHeader, buf)
   }
 }
