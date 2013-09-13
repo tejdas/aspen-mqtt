@@ -32,7 +32,7 @@ class AMQFrameDecoder extends ByteToMessageDecoder {
 
     if (0 == amqMessageInProgress.messageLength) {
       parseAndDecode(null, frames)
-    } else if (buf.readableBytes() >= amqMessageInProgress.messageLength) {
+    } else if (buf.readableBytes() > amqMessageInProgress.messageLength) {
       val readerIndex = buf.readerIndex()
       val protocolData = buf.slice(readerIndex, amqMessageInProgress.messageLength)
       buf.readerIndex(readerIndex + amqMessageInProgress.messageLength)
